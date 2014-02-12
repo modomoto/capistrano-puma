@@ -27,7 +27,7 @@ namespace :puma do
     on roles fetch(:puma_role) do
       within release_path do
         if config_file
-          execute *fetch(:pumactl_cmd), "-C #{config_file} stop"
+          execute *fetch(:pumactl_cmd), "-F #{config_file} stop"
         else
           execute *fetch(:pumactl_cmd), "-S #{state_path} stop"
         end
@@ -40,7 +40,7 @@ namespace :puma do
     on roles fetch(:puma_role) do
       within release_path do
         if config_file
-          execute *fetch(:pumactl_cmd), "-C #{config_file} restart"
+          execute *fetch(:pumactl_cmd), "-F #{config_file} restart"
         elsif test "[[ -f #{state_path} ]]"
           execute *fetch(:pumactl_cmd), "-S #{state_path} restart"
         else
@@ -54,7 +54,24 @@ namespace :puma do
   task phased_restart: :check_sockets_dir do
     on roles fetch(:puma_role) do
       within release_path do
-        execute *fetch(:pumactl_cmd), "-S #{state_path} phased-restart"
+        if config_file
+          execute *fetch(:pumactl_cmd), "-F #{config_file} phased-restart"
+        elsif test "[[ -f #{state_path} ]]"
+          execute *fetch(:pumactl_cmd), "-S #{state_path} phased-restart"
+        end
+      end
+    end
+  end
+
+  desc 'Puma status'
+  task status: :check_sockets_dir do
+    on roles fetch(:puma_role) do
+      within release_path do
+        if config_file
+          execute *fetch(:pumactl_cmd), "-F #{config_file} status"
+        elsif test "[[ -f #{state_path} ]]"
+          execute *fetch(:pumactl_cmd), "-S #{state_path} status"
+        end
       end
     end
   end
