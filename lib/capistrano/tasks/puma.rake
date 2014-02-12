@@ -26,7 +26,11 @@ namespace :puma do
   task stop: :check_sockets_dir do
     on roles fetch(:puma_role) do
       within release_path do
-        execute *fetch(:pumactl_cmd), "-S #{state_path} stop"
+        if config_file
+          execute *fetch(:pumactl_cmd), "-C #{config_file} stop"
+        else
+          execute *fetch(:pumactl_cmd), "-S #{state_path} stop"
+        end
       end
     end
   end
@@ -35,7 +39,9 @@ namespace :puma do
   task restart: :check_sockets_dir do
     on roles fetch(:puma_role) do
       within release_path do
-        if test "[[ -f #{state_path} ]]"
+        if config_file
+          execute *fetch(:pumactl_cmd), "-C #{config_file} restart"
+        elsif test "[[ -f #{state_path} ]]"
           execute *fetch(:pumactl_cmd), "-S #{state_path} restart"
         else
           execute *fetch(:puma_cmd), start_options
