@@ -105,7 +105,7 @@ namespace :puma do
   end
 
   def puma_env
-    fetch(:rack_env, fetch(:rails_env, 'production'))
+    fetch(:rack_env, fetch(:stage, 'production'))
   end
 
   def state_path
