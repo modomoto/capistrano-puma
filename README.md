@@ -21,6 +21,10 @@ Finally add this line to you application's Capfile:
 
 Since the code is mostly a copy-n-paste of capistrano support in `puma` gem, it behaves just the same.
 
+## History of changes
+
+We added some changes to the rake tasks to make the start/stop/restart behaviour more flexible for the different possible variants of puma setups.
+
 ## Contributing
 
 1. Fork it

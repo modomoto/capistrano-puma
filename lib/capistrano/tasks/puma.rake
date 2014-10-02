@@ -39,10 +39,14 @@ namespace :puma do
   task restart: :check_sockets_dir do
     on roles fetch(:puma_role) do
       within release_path do
-        if config_file
-          execute *fetch(:pumactl_cmd), "-F #{config_file} restart"
-        elsif test "[[ -f #{state_path} ]]"
-          execute *fetch(:pumactl_cmd), "-S #{state_path} restart"
+        if pid_file
+          if config_file
+            execute *fetch(:pumactl_cmd), "-F #{config_file} restart"
+          elsif test "[[ -f #{state_path} ]]"
+            execute *fetch(:pumactl_cmd), "-S #{state_path} restart"
+          else
+            execute *fetch(:puma_cmd), start_options
+          end
         else
           execute *fetch(:puma_cmd), start_options
         end
@@ -104,6 +108,14 @@ namespace :puma do
     end
   end
 
+  def pid_file
+    @_pid_file ||= begin
+      file = fetch(:puma_pid, nil)
+      file = nil if !File.exists?(file)
+      file
+    end
+  end
+
   def puma_env
     fetch(:rack_env, fetch(:stage, 'production'))
   end
@@ -127,6 +139,7 @@ namespace :load do
     set :pumactl_cmd , -> { [fetch(:bundle_cmd, :bundle), 'exec pumactl'] }
     set :puma_state  , -> { shared_path.join('sockets/puma.state') }
     set :puma_socket , -> { "unix://#{shared_path}/sockets/puma.sock" }
+    set :puma_pid    , -> { shared_path.join('sockets/puma.pid') }
     set :puma_role   , :app
   end
 end
