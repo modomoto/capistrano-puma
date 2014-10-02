@@ -39,15 +39,21 @@ namespace :puma do
   task restart: :check_sockets_dir do
     on roles fetch(:puma_role) do
       within release_path do
-        if pid_file
-          if config_file
-            execute *fetch(:pumactl_cmd), "-F #{config_file} restart"
-          elsif test "[[ -f #{state_path} ]]"
-            execute *fetch(:pumactl_cmd), "-S #{state_path} restart"
+        begin
+          if test "[[ -f #{pid_file} ]]"
+            puts "puma restart"
+            if config_file
+              execute *fetch(:pumactl_cmd), "-F #{config_file} restart"
+            elsif test "[[ -f #{state_path} ]]"
+              execute *fetch(:pumactl_cmd), "-S #{state_path} restart"
+            else
+              execute *fetch(:puma_cmd), start_options
+            end
           else
+            puts "puma start"
             execute *fetch(:puma_cmd), start_options
           end
-        else
+        rescue
           execute *fetch(:puma_cmd), start_options
         end
       end
@@ -109,11 +115,7 @@ namespace :puma do
   end
 
   def pid_file
-    @_pid_file ||= begin
-      file = fetch(:puma_pid, nil)
-      file = nil if !File.exists?(file)
-      file
-    end
+      fetch(:puma_pid)
   end
 
   def puma_env
