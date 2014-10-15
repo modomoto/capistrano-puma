@@ -140,7 +140,7 @@ namespace :load do
     set :puma_cmd    , -> { [fetch(:bundle_cmd, :bundle), 'exec puma'] }
     set :pumactl_cmd , -> { [fetch(:bundle_cmd, :bundle), 'exec pumactl'] }
     set :puma_state  , -> { shared_path.join('sockets/puma.state') }
-    set :puma_socket , -> { "unix://#{shared_path}/sockets/puma.sock" }
+    set :puma_socket , -> { "unix://#{shared_path}/sockets/pumactl.sock" }
     set :puma_pid    , -> { shared_path.join('sockets/puma.pid') }
     set :puma_role   , :app
   end
